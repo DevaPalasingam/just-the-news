@@ -8,3 +8,8 @@ Just the news without all the clickbait. Built with **_Alpine JS_** and **_Pico 
 - Test with generic API
 - Connect with Newsdata.io
 - Styling
+
+## Future development idea
+
+- Dark mode toggle
+- Reader assist mode
