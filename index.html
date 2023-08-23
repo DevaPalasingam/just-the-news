@@ -35,9 +35,10 @@
           <p x-text="fakePost"></p>
         </template>
         <template x-for="post in $store.vars.posts">
-          <article>
-            <p x-text="post.title"></p>
+          <article x-data="{open: false}" x-on:click="open = ! open">
+            <h5 x-text="post.title"></h5>
             <p x-text="post.description"></p>
+            <p x-text="post.content" x-show="open"></p>
           </article>
         </template>
       </div>
