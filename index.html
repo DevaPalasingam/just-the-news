@@ -11,24 +11,61 @@
     <main class="container">
       <h1 style="margin: 0">Just the News</h1>
       <h5>Minus the clickbait</h5>
-      <div
-        x-data="{posts:[]}"
-        x-init="posts = await (await fetch('https://baconipsum.com/api/?type=all-meat')).json()"
-      >
+      <div x-init="$store.vars.posts" x-data="{userInput: ''}">
+        <div>
+          <form @submit.prevent="getNews(userInput)">
+            <label for="search">
+              What would you like to read about?
+              <input
+                x-model="userInput"
+                type="text"
+                id="search"
+                name="search"
+                placeholder="Search"
+                required
+              />
+            </label>
+            <button type="submit">Submit</button>
+          </form>
+        </div>
         <button style="width: auto" x-on:click="getFakeNews()">
           Fake News!
         </button>
-        <p x-text="posts"></p>
+        <template x-for="post in $store.vars.posts">
+          <p x-text="post"></p>
+        </template>
       </div>
     </main>
     <script>
+      document.addEventListener("alpine:init", () => {
+        Alpine.store("vars", {
+          posts: [],
+          userInput: "",
+        });
+      });
+
+      function getNews(userInput) {
+        let fetchStr =
+          "https://newsdata.io/api/1/news?apikey=pub_28064eb779503c7f74c0a3a94ff0ce6497b4b&q=" +
+          userInput;
+
+        fetch(fetchStr)
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            Alpine.store("vars.posts", data.results[0].description);
+          })
+          .catch((error) => console.log(error));
+      }
+
       function getFakeNews() {
         fetch("https://baconipsum.com/api/?type=all-meat")
           .then((res) => {
             return res.json();
           })
           .then((data) => {
-            console.log(data);
+            Alpine.store("vars.posts", data);
           })
           .catch((error) => console.log(error));
       }
