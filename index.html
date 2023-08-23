@@ -28,9 +28,22 @@
             <button type="submit">Submit</button>
           </form>
         </div>
-        <button style="width: auto" x-on:click="$store.vars.getFakeNews()">
-          Fake News!
-        </button>
+        <div style="display: flex">
+          <button
+            style="width: auto; margin-right: 1rem"
+            x-on:click="$store.vars.getFakeNews()"
+            class="secondary"
+          >
+            Fake News!
+          </button>
+          <button
+            style="width: auto"
+            x-on:click="speedRead()"
+            class="secondary outline"
+          >
+            Speed Read Mode
+          </button>
+        </div>
         <template x-for="fakePost in $store.vars.fakePosts">
           <p x-text="fakePost"></p>
         </template>
@@ -85,6 +98,40 @@
           },
         });
       });
+
+      function speedRead() {
+        const paras = document.querySelectorAll("p, li");
+
+        for (let c = 0; c <= paras.length; c++) {
+          myFunction(paras, c);
+        }
+
+        function myFunction(item, index) {
+          let text = item[index].innerHTML.split(" ");
+          for (let i = 0; i < text.length; i++) {
+            if (
+              !(
+                text[i].includes("<") ||
+                text[i].includes("=") ||
+                text[i].includes("&") ||
+                !text[i]
+              )
+            ) {
+              if (text[i].length > 3) {
+                text[i] =
+                  "<strong>" +
+                  text[i].substr(0, 3) +
+                  "</strong>" +
+                  text[i].substr(3);
+              } else {
+                text[i] =
+                  "<strong>" + text[i][0] + "</strong>" + text[i].substr(1);
+              }
+            }
+          }
+          item[index].innerHTML = text.join(" ");
+        }
+      }
     </script>
   </body>
 </html>
