@@ -11,13 +11,13 @@
     <main class="container">
       <h1 style="margin: 0">Just the News</h1>
       <h5>Minus the clickbait</h5>
-      <div x-init="$store.vars.posts" x-data="{userInput: ''}">
+      <div x-init="$store.vars">
         <div>
-          <form @submit.prevent="getNews(userInput)">
+          <form @submit.prevent="$store.vars.getNews()">
             <label for="search">
               What would you like to read about?
               <input
-                x-model="userInput"
+                x-model="$store.vars.userInput"
                 type="text"
                 id="search"
                 name="search"
@@ -28,11 +28,17 @@
             <button type="submit">Submit</button>
           </form>
         </div>
-        <button style="width: auto" x-on:click="getFakeNews()">
+        <button style="width: auto" x-on:click="$store.vars.getFakeNews()">
           Fake News!
         </button>
+        <template x-for="fakePost in $store.vars.fakePosts">
+          <p x-text="fakePost"></p>
+        </template>
         <template x-for="post in $store.vars.posts">
-          <p x-text="post"></p>
+          <article>
+            <p x-text="post.title"></p>
+            <p x-text="post.description"></p>
+          </article>
         </template>
       </div>
     </main>
@@ -40,35 +46,44 @@
       document.addEventListener("alpine:init", () => {
         Alpine.store("vars", {
           posts: [],
+          fakePosts: [],
           userInput: "",
+          getNews() {
+            let fetchStr =
+              "https://newsdata.io/api/1/news?apikey=pub_28064eb779503c7f74c0a3a94ff0ce6497b4b&language=en&q=" +
+              this.userInput;
+            this.userInput = "";
+            this.fakePosts = [];
+            this.posts = [
+              {
+                title: "Loading...",
+                description: "Please give me a moment to sip my coffee",
+              },
+            ];
+
+            fetch(fetchStr)
+              .then((res) => {
+                return res.json();
+              })
+              .then((data) => {
+                this.posts = data.results;
+              })
+              .catch((error) => console.log(error));
+          },
+          getFakeNews() {
+            this.posts = [];
+            this.fakePosts = ["Loading your Bologna..."];
+            fetch("https://baconipsum.com/api/?type=all-meat")
+              .then((res) => {
+                return res.json();
+              })
+              .then((data) => {
+                this.fakePosts = data;
+              })
+              .catch((error) => console.log(error));
+          },
         });
       });
-
-      function getNews(userInput) {
-        let fetchStr =
-          "https://newsdata.io/api/1/news?apikey=pub_28064eb779503c7f74c0a3a94ff0ce6497b4b&q=" +
-          userInput;
-
-        fetch(fetchStr)
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            Alpine.store("vars.posts", data.results[0].description);
-          })
-          .catch((error) => console.log(error));
-      }
-
-      function getFakeNews() {
-        fetch("https://baconipsum.com/api/?type=all-meat")
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            Alpine.store("vars.posts", data);
-          })
-          .catch((error) => console.log(error));
-      }
     </script>
   </body>
 </html>
